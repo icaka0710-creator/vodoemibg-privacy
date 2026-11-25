@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Покана за риболов – Водоеми БГ</title>
+<style>
+  :root { --accent: #0b6e8a; --bg: #fff; --fg: #1b1b1b; --muted: #666; --box: #eef7fa; }
+  @media (prefers-color-scheme: dark) { :root { --accent: #7cc7dd; --bg: #121212; --fg: #e6e6e6; --muted: #aaa; --box: #17282e; } }
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.5; color: var(--fg);
+         background: var(--bg); margin: 0 auto; max-width: 560px; padding: 16px; }
+  h1 { font-size: 1.4em; color: var(--accent); margin: 0.4em 0 0.2em; }
+  .card { background: var(--box); border-left: 4px solid var(--accent); padding: 12px 16px; border-radius: 8px; margin: 16px 0; }
+  .water { font-size: 1.35em; font-weight: 700; }
+  .when { font-size: 1.15em; margin-top: 4px; }
+  .btn { display: block; text-align: center; text-decoration: none; padding: 14px; border-radius: 24px; margin: 10px 0;
+         font-weight: 600; font-size: 1.05em; }
+  .primary { background: var(--accent); color: var(--bg); }
+  .secondary { border: 2px solid var(--accent); color: var(--accent); }
+  .muted { color: var(--muted); font-size: 0.9em; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<h1>🎣 <span data-bg="Покана за риболов" data-en="Fishing invitation">Покана за риболов</span></h1>
+
+<div id="ok" class="hidden">
+  <div class="card">
+    <div class="water" id="water"></div>
+    <div class="when" id="when"></div>
+  </div>
+  <a class="btn primary hidden" id="open" data-bg="📱 Отвори във „Водоеми БГ“" data-en="📱 Open in Vodoemi BG">📱 Отвори във „Водоеми БГ“</a>
+  <a class="btn secondary" id="nav" target="_blank" rel="noopener" data-bg="🧭 Навигация (Google Maps)" data-en="🧭 Navigate (Google Maps)">🧭 Навигация (Google Maps)</a>
+  <a class="btn secondary" id="map" target="_blank" rel="noopener" data-bg="🗺️ Виж на картата" data-en="🗺️ See on the map">🗺️ Виж на картата</a>
+  <p class="muted" data-bg="„Водоеми БГ“ е приложение за Android с карта на водоемите, рибата, забраните и условията за риболов в България."
+     data-en="Vodoemi BG is an Android app with a map of Bulgaria's waters, fish, closed seasons and fishing conditions.">
+    „Водоеми БГ“ е приложение за Android с карта на водоемите, рибата, забраните и условията за риболов в България.</p>
+</div>
+
+<div id="bad" class="hidden card" data-bg="Линкът е непълен или повреден." data-en="The link is incomplete or broken.">Линкът е непълен или повреден.</div>
+
+<script>
+(function () {
+  var en = !/^bg\b/i.test(navigator.language || 'bg');
+  document.documentElement.lang = en ? 'en' : 'bg';
+  document.querySelectorAll('[data-bg]').forEach(function (el) { el.textContent = el.getAttribute(en ? 'data-en' : 'data-bg'); });
+  if (en) document.title = 'Fishing invitation – Vodoemi BG';
+
+  var q = new URLSearchParams(location.search);
+  var lat = parseFloat(q.get('lat')), lon = parseFloat(q.get('lon'));
+  var name = (q.get('n') || '').slice(0, 80), d = q.get('d') || '', t = q.get('t') || '';
+  var valid = isFinite(lat) && isFinite(lon) && lat > 41 && lat < 44.5 && lon > 22 && lon < 29 &&
+    /^\d{4}-\d{2}-\d{2}$/.test(d) && /^\d{1,2}:\d{2}$/.test(t);
+  if (!valid) { document.getElementById('bad').classList.remove('hidden'); return; }
+
+  document.getElementById('ok').classList.remove('hidden');
+  document.getElementById('water').textContent = name || (lat.toFixed(4) + ', ' + lon.toFixed(4));
+  var date = new Date(d + 'T12:00:00');
+  var day = date.toLocaleDateString(en ? 'en-GB' : 'bg-BG', { weekday: 'long', day: 'numeric', month: 'long' });
+  document.getElementById('when').textContent = day.charAt(0).toUpperCase() + day.slice(1) + ', ' + t;
+
+  document.getElementById('nav').href = 'https://www.google.com/maps/dir/?api=1&destination=' + lat + ',' + lon;
+  document.getElementById('map').href = 'https://www.openstreetmap.org/?mlat=' + lat + '&mlon=' + lon + '#map=13/' + lat + '/' + lon;
+
+  // Отваряне на приложението (само Android): ако го няма – остава на тази страница
+  if (/Android/i.test(navigator.userAgent)) {
+    var open = document.getElementById('open');
+    var fallback = encodeURIComponent(location.href.split('#')[0] + '#noapp');
+    open.href = 'intent://invite' + location.search + '#Intent;scheme=vodoemi;package=bg.vodoemi.app;S.browser_fallback_url=' + fallback + ';end';
+    if (location.hash !== '#noapp') open.classList.remove('hidden');
+  }
+})();
+</script>
+</body>
+</html>
