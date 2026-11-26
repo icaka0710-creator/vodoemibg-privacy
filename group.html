@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="bg">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Покана в група – Водоеми БГ</title>
+<style>
+  :root { --accent: #0b6e8a; --bg: #fff; --fg: #1b1b1b; --muted: #666; --box: #eef7fa; }
+  @media (prefers-color-scheme: dark) { :root { --accent: #7cc7dd; --bg: #121212; --fg: #e6e6e6; --muted: #aaa; --box: #17282e; } }
+  body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.5; color: var(--fg);
+         background: var(--bg); margin: 0 auto; max-width: 560px; padding: 16px; }
+  h1 { font-size: 1.4em; color: var(--accent); margin: 0.4em 0 0.2em; }
+  .card { background: var(--box); border-left: 4px solid var(--accent); padding: 12px 16px; border-radius: 8px; margin: 16px 0; }
+  .code { font-size: 1.8em; font-weight: 700; letter-spacing: 0.08em; font-family: ui-monospace, Consolas, monospace; }
+  .btn { display: block; text-align: center; text-decoration: none; padding: 14px; border-radius: 24px; margin: 10px 0;
+         font-weight: 600; font-size: 1.05em; }
+  .primary { background: var(--accent); color: var(--bg); }
+  .muted { color: var(--muted); font-size: 0.9em; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<h1>👥 <span data-bg="Покана в група" data-en="Group invitation">Покана в група</span></h1>
+
+<div id="ok" class="hidden">
+  <p data-bg="Приятел ви кани в частната си група във „Водоеми БГ“ – общи улови, кой е на водата, чат и класация."
+     data-en="A friend invites you to their private group in Vodoemi BG – shared catches, who is at the water, chat and a leaderboard.">
+    Приятел ви кани в частната си група във „Водоеми БГ“ – общи улови, кой е на водата, чат и класация.</p>
+  <div class="card">
+    <div class="muted" data-bg="Код на групата" data-en="Group code">Код на групата</div>
+    <div class="code" id="code"></div>
+  </div>
+  <a class="btn primary hidden" id="open" data-bg="📱 Отвори във „Водоеми БГ“" data-en="📱 Open in Vodoemi BG">📱 Отвори във „Водоеми БГ“</a>
+  <p class="muted" data-bg="Ако линкът не отвори приложението: в него изберете ☰ Още → 👥 Групи с приятели → 🔑 Влез с код и напишете кода."
+     data-en="If the link does not open the app: in the app choose ☰ More → 👥 Groups with friends → 🔑 Join with code and type the code.">
+    Ако линкът не отвори приложението: в него изберете ☰ Още → 👥 Групи с приятели → 🔑 Влез с код и напишете кода.</p>
+  <p class="muted" data-bg="„Водоеми БГ“ е приложение за Android с карта на водоемите, рибата, забраните и условията за риболов в България."
+     data-en="Vodoemi BG is an Android app with a map of Bulgaria's waters, fish, closed seasons and fishing conditions.">
+    „Водоеми БГ“ е приложение за Android с карта на водоемите, рибата, забраните и условията за риболов в България.</p>
+</div>
+
+<div id="bad" class="hidden card" data-bg="Линкът е непълен или повреден." data-en="The link is incomplete or broken.">Линкът е непълен или повреден.</div>
+
+<script>
+(function () {
+  var en = !/^bg\b/i.test(navigator.language || 'bg');
+  document.documentElement.lang = en ? 'en' : 'bg';
+  document.querySelectorAll('[data-bg]').forEach(function (el) { el.textContent = el.getAttribute(en ? 'data-en' : 'data-bg'); });
+  if (en) document.title = 'Group invitation – Vodoemi BG';
+
+  // Кодът: 8 знака без 0/O и 1/I (същото като в приложението)
+  var c = (new URLSearchParams(location.search).get('c') || '').toUpperCase().replace(/[\s-]/g, '');
+  if (!/^[A-HJ-NP-Z2-9]{8}$/.test(c)) { document.getElementById('bad').classList.remove('hidden'); return; }
+
+  document.getElementById('ok').classList.remove('hidden');
+  document.getElementById('code').textContent = c.slice(0, 4) + '-' + c.slice(4);
+
+  // Отваряне на приложението (само Android): ако го няма – остава на тази страница
+  if (/Android/i.test(navigator.userAgent)) {
+    var open = document.getElementById('open');
+    var fallback = encodeURIComponent(location.href.split('#')[0] + '#noapp');
+    open.href = 'intent://group?c=' + c + '#Intent;scheme=vodoemi;package=bg.vodoemi.app;S.browser_fallback_url=' + fallback + ';end';
+    if (location.hash !== '#noapp') open.classList.remove('hidden');
+  }
+})();
+</script>
+</body>
+</html>
